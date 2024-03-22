@@ -1,2 +1,2 @@
 # SU-PA2
-This repository for the assignment-2 of Speech Understanding.
+This repository is for the assignment-2 of Speech Understanding.
