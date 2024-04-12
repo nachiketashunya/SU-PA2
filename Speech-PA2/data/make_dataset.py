@@ -1,14 +1,9 @@
 import torch
 import torchaudio
-from torch.utils.data import Dataset, DataLoader
 import os
 
-# Get voxceleb data 
-dataset_dir = "/home/nachiketa/Speech-PA2/data/processed"
-meta_url = "https://mm.kaist.ac.kr/datasets/voxceleb/meta/list_test_hard2.txt"
-
-class VoxCelebDataset(Dataset):
-  def __init__(self, data_dir, text_file, max_frames=1000):
+class CustomDataset(torch.utils.data.Dataset):
+  def __init__(self, data_dir, text_file, max_frames=32000):
     self.data_dir = data_dir
     self.text_file = text_file
     self.max_frames = max_frames
@@ -18,17 +13,30 @@ class VoxCelebDataset(Dataset):
     with open(text_file, 'r') as f:
       for line in f:
         label, first_wav, second_wav = line.strip().split()
-        self.data_list.append((label, first_wav, second_wav))
+
+        first_w_path = os.path.join(self.data_dir, first_wav)
+        second_w_path = os.path.join(self.data_dir, second_wav)
+
+        if os.path.exists(first_w_path) and os.path.exists(second_w_path):
+          self.data_list.append((label, first_wav, second_wav))
+
+  def __len__(self):
+    return len(self.data_list)
 
   def __getitem__(self, index):
     label, first_wav_path, second_wav_path = self.data_list[index]
-    first_wav_tensor, _ = self.process_sample(first_wav_path)
-    second_wav_tensor, _ = self.process_sample(second_wav_path)
-    return first_wav_tensor, second_wav_tensor, label
+    first_wav_tensor, first_sample_rate = self.process_sample(first_wav_path)
+    second_wav_tensor, second_sample_rate = self.process_sample(second_wav_path)
+
+    label = torch.tensor(np.array(int(label)))
+
+    return first_wav_tensor.squeeze(0), second_wav_tensor.squeeze(0), label
 
   def process_sample(self, path):
+    filename, _ = os.path.splitext(path)
+    path = filename + ".wav"
     file_path = os.path.join(self.data_dir, path)
-    
+
     wav, sample_rate = torchaudio.load(file_path)
     num_frames = wav.shape[1]
 
@@ -38,16 +46,4 @@ class VoxCelebDataset(Dataset):
     elif num_frames > self.max_frames:
       wav = wav[:, :self.max_frames]
 
-    wav = wav.unsqueeze(0)  # Add channel dimension if required
-
     return wav, sample_rate
-
-def get_test_loader():
-    max_frames = 30000
-    wav_dir = os.path.join(dataset_dir, "wav")
-    text_file = os.path.join(dataset_dir, "list_test_hard2.txt")
-
-    test_dataset = VoxCelebDataset(wav_dir, text_file, max_frames)
-    test_loader = DataLoader(test_dataset, batch_size=8, num_workers=2, shuffle=True)
-
-    return test_loader
