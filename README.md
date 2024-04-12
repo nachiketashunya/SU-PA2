@@ -17,7 +17,7 @@ Selected Models = Wavlm Base+, Unispeech-sat-base, Ecapa-TDNN
    - Execute the `Speech-PA2/evaluation/kb_eval.py` script.
 
 3. **Fine Tune on KathBath Dataset:**
-   - Run `SU-PA2-Q2/evaluation/evaluate.py`.
+   - Run `Speech-PA2/training/train.py`.
 
     *Evaluation Metrics:*
     - Scale-Invariant Signal-to-Noise Ratio (SI-SNR) and Signal Distortion Ratio (SDR) are computed for each separated source in the mixture.
@@ -28,10 +28,6 @@ Selected Models = Wavlm Base+, Unispeech-sat-base, Ecapa-TDNN
     - Intermediate results (SNR and SDR for each source) are logged during evaluation.
     - Final average SNR and SDR values are calculated and reported.
 
-Speech-PA2
-==============================
-
-This is an assignment of Speech Understanding
 
 Project Organization
 ------------
